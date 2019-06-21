@@ -23,7 +23,7 @@ var Menu = (function() {
 
     this.$node = $(o.node);
     this.$container = $(o.container);
-    this.topIdent = o.topIdent || 0;
+    this.topIndent = o.topIndent || 0;
     this.$target = $(o.target);
 
     // the latest query #update was called with

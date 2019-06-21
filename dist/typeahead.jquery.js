@@ -933,7 +933,7 @@
             www.mixin(this);
             this.$node = $(o.node);
             this.$container = $(o.container);
-            this.topIdent = o.topIdent || 0;
+            this.topIndent = o.topIndent || 0;
             this.$target = $(o.target);
             this.query = null;
             this.datasets = _.map(o.datasets, initializeDataset);
@@ -1134,7 +1134,7 @@
                     var o = _.getRelativeOffset($el, this.$container);
                     this._show({
                         left: o && o.left >= 0 ? o.left + "px" : null,
-                        top: o && o.top >= 0 ? o.top + $el.outerHeight() + this.topIdent + "px" : null,
+                        top: o && o.top >= 0 ? o.top + $el.outerHeight() + this.topIndent + "px" : null,
                         width: $el.outerWidth() + "px"
                     });
                 }
@@ -1531,7 +1531,7 @@
                         node: $menu,
                         datasets: datasets,
                         container: $menuContainer,
-                        topIdent: menuOptions.topIdent,
+                        topIndent: menuOptions.topIndent,
                         target: $menuTarget
                     }, www);
                     status = new Status({

@@ -24,7 +24,7 @@ var DefaultMenu = (function() {
         var o = _.getRelativeOffset($el, this.$container);
         this._show({
           left: o && o.left >= 0 ? (o.left + 'px') : null,
-          top: o && o.top >= 0 ? (o.top + $el.outerHeight() + this.topIdent  + 'px') : null,
+          top: o && o.top >= 0 ? (o.top + $el.outerHeight() + this.topIndent  + 'px') : null,
           width: $el.outerWidth() + 'px',
         });
       }

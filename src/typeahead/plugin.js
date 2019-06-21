@@ -86,7 +86,7 @@
           node: $menu,
           datasets: datasets,
           container: $menuContainer,
-          topIdent: menuOptions.topIdent,
+          topIndent: menuOptions.topIndent,
           target: $menuTarget
         }, www);
 
