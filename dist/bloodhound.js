@@ -1,15 +1,16 @@
 /*!
- * typeahead.js 1.2.0
- * https://github.com/twitter/typeahead.js
- * Copyright 2013-2017 Twitter, Inc. and other contributors; Licensed MIT
+ * typeahead.js 1.2.1
+ * https://github.com/corejavascript/typeahead.js
+ * Copyright 2013-2019 Twitter, Inc. and other contributors; Licensed MIT
  */
+
 
 (function(root, factory) {
     if (typeof define === "function" && define.amd) {
         define([ "jquery" ], function(a0) {
             return root["Bloodhound"] = factory(a0);
         });
-    } else if (typeof exports === "object") {
+    } else if (typeof module === "object" && module.exports) {
         module.exports = factory(require("jquery"));
     } else {
         root["Bloodhound"] = factory(root["jQuery"]);
@@ -155,10 +156,25 @@
                 }
                 return "tt-" + _p8() + _p8(true) + _p8(true) + _p8();
             },
-            noop: function() {}
+            noop: function() {},
+            getRelativeOffset: function($node, $container) {
+                if ($.contains($node[0], $container[0])) {
+                    return null;
+                }
+                var pos = $node.position();
+                var $parent = $node.offsetParent();
+                var parentPos;
+                while ($parent[0] !== $container[0] && !$.contains($parent[0], $container[0])) {
+                    parentPos = $parent.position();
+                    pos.left += parentPos.left;
+                    pos.top += parentPos.top;
+                    $parent = $parent.offsetParent();
+                }
+                return pos;
+            }
         };
     }();
-    var VERSION = "1.2.0";
+    var VERSION = "1.2.1";
     var tokenizers = function() {
         "use strict";
         return {

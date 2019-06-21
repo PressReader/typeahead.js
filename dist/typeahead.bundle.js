@@ -1,15 +1,16 @@
 /*!
- * typeahead.js 1.2.0
- * https://github.com/twitter/typeahead.js
- * Copyright 2013-2017 Twitter, Inc. and other contributors; Licensed MIT
+ * typeahead.js 1.2.1
+ * https://github.com/corejavascript/typeahead.js
+ * Copyright 2013-2019 Twitter, Inc. and other contributors; Licensed MIT
  */
+
 
 (function(root, factory) {
     if (typeof define === "function" && define.amd) {
         define([ "jquery" ], function(a0) {
             return root["Bloodhound"] = factory(a0);
         });
-    } else if (typeof exports === "object") {
+    } else if (typeof module === "object" && module.exports) {
         module.exports = factory(require("jquery"));
     } else {
         root["Bloodhound"] = factory(root["jQuery"]);
@@ -155,10 +156,25 @@
                 }
                 return "tt-" + _p8() + _p8(true) + _p8(true) + _p8();
             },
-            noop: function() {}
+            noop: function() {},
+            getRelativeOffset: function($node, $container) {
+                if ($.contains($node[0], $container[0])) {
+                    return null;
+                }
+                var pos = $node.position();
+                var $parent = $node.offsetParent();
+                var parentPos;
+                while ($parent[0] !== $container[0] && !$.contains($parent[0], $container[0])) {
+                    parentPos = $parent.position();
+                    pos.left += parentPos.left;
+                    pos.top += parentPos.top;
+                    $parent = $parent.offsetParent();
+                }
+                return pos;
+            }
         };
     }();
-    var VERSION = "1.2.0";
+    var VERSION = "1.2.1";
     var tokenizers = function() {
         "use strict";
         return {
@@ -956,7 +972,7 @@
         define([ "jquery" ], function(a0) {
             return factory(a0);
         });
-    } else if (typeof exports === "object") {
+    } else if (typeof module === "object" && module.exports) {
         module.exports = factory(require("jquery"));
     } else {
         factory(root["jQuery"]);
@@ -1102,7 +1118,22 @@
                 }
                 return "tt-" + _p8() + _p8(true) + _p8(true) + _p8();
             },
-            noop: function() {}
+            noop: function() {},
+            getRelativeOffset: function($node, $container) {
+                if ($.contains($node[0], $container[0])) {
+                    return null;
+                }
+                var pos = $node.position();
+                var $parent = $node.offsetParent();
+                var parentPos;
+                while ($parent[0] !== $container[0] && !$.contains($parent[0], $container[0])) {
+                    parentPos = $parent.position();
+                    pos.left += parentPos.left;
+                    pos.top += parentPos.top;
+                    $parent = $parent.offsetParent();
+                }
+                return pos;
+            }
         };
     }();
     var WWW = function() {
@@ -1863,6 +1894,9 @@
             }
             www.mixin(this);
             this.$node = $(o.node);
+            this.$container = $(o.container);
+            this.topIdent = o.topIdent || 0;
+            this.$target = $(o.target);
             this.query = null;
             this.datasets = _.map(o.datasets, initializeDataset);
             function initializeDataset(oDataset) {
@@ -2057,7 +2091,15 @@
         }
         _.mixin(DefaultMenu.prototype, Menu.prototype, {
             open: function open() {
-                !this._allDatasetsEmpty() && this._show();
+                if (!this._allDatasetsEmpty()) {
+                    var $el = this.$target;
+                    var o = _.getRelativeOffset($el, this.$container);
+                    this._show({
+                        left: o && o.left >= 0 ? o.left + "px" : null,
+                        top: o && o.top >= 0 ? o.top + $el.outerHeight() + this.topIdent + "px" : null,
+                        width: $el.outerWidth() + "px"
+                    });
+                }
                 return s.open.apply(this, [].slice.call(arguments, 0));
             },
             close: function close() {
@@ -2087,8 +2129,18 @@
             _hide: function hide() {
                 this.$node.hide();
             },
-            _show: function show() {
-                this.$node.css("display", "block");
+            _show: function show(params) {
+                if (params) {
+                    this.left = params.left;
+                    this.top = params.top;
+                    this.width = params.width;
+                }
+                this.$node.css({
+                    display: "block",
+                    left: this.left,
+                    top: this.top,
+                    width: this.width
+                });
             }
         });
         return DefaultMenu;
@@ -2399,7 +2451,7 @@
                 www = WWW(o.classNames);
                 return this.each(attach);
                 function attach() {
-                    var $input, $wrapper, $hint, $menu, defaultHint, defaultMenu, eventBus, input, menu, status, typeahead, MenuConstructor;
+                    var $input, $wrapper, $hint, $menu, $menuContainer, $menuTarget, defaultHint, defaultMenu, eventBus, input, menu, status, typeahead, menuOptions, MenuConstructor;
                     _.each(datasets, function(d) {
                         d.highlight = !!o.highlight;
                     });
@@ -2407,6 +2459,12 @@
                     $wrapper = $(www.html.wrapper);
                     $hint = $elOrNull(o.hint);
                     $menu = $elOrNull(o.menu);
+                    menuOptions = o.menu || {};
+                    $menuContainer = $(menuOptions.container);
+                    $menuTarget = $(menuOptions.target);
+                    if (!$menuTarget.length) {
+                        $menuTarget = $input;
+                    }
                     defaultHint = o.hint !== false && !$hint;
                     defaultMenu = o.menu !== false && !$menu;
                     defaultHint && ($hint = buildHintFromInput($input, www));
@@ -2416,7 +2474,12 @@
                     if (defaultHint || defaultMenu) {
                         $wrapper.css(www.css.wrapper);
                         $input.css(defaultHint ? www.css.input : www.css.inputWithNoHint);
-                        $input.wrap($wrapper).parent().prepend(defaultHint ? $hint : null).append(defaultMenu ? $menu : null);
+                        var $w = $input.wrap($wrapper).parent();
+                        $w.prepend(defaultHint ? $hint : null);
+                        if (!$menuContainer.length) {
+                            $menuContainer = $w;
+                        }
+                        $menuContainer.append(defaultMenu ? $menu : null);
                     }
                     MenuConstructor = defaultMenu ? DefaultMenu : Menu;
                     eventBus = new EventBus({
@@ -2428,7 +2491,10 @@
                     }, www);
                     menu = new MenuConstructor({
                         node: $menu,
-                        datasets: datasets
+                        datasets: datasets,
+                        container: $menuContainer,
+                        topIdent: menuOptions.topIdent,
+                        target: $menuTarget
                     }, www);
                     status = new Status({
                         $input: $input,

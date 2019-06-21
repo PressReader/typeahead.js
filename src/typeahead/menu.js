@@ -22,6 +22,9 @@ var Menu = (function() {
     www.mixin(this);
 
     this.$node = $(o.node);
+    this.$container = $(o.container);
+    this.topIdent = o.topIdent || 0;
+    this.$target = $(o.target);
 
     // the latest query #update was called with
     this.query = null;
