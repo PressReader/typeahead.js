@@ -67,16 +67,16 @@ var DefaultMenu = (function() {
       this.$node.hide();
     },
 
-    _show: function show(params) {
+    _show: function show() {
       this.$node.css(this.cssDisplayObject);
     },
 
     _buildCssDisplayObject: function buildCssDisplayObject() {
+      var result = { display: 'block' };
       var $el = this.$target;
       var o = _.getRelativeOffset($el, this.$container);
-      var result = { display: 'block' };
       if (o) {
-        return $.merge(result, {
+        result = $.extend(result, {
           left: o.left + 'px',
           top: (o.top + $el.outerHeight() + this.topIndent  + 'px'),
           width: $el.outerWidth() + 'px'
