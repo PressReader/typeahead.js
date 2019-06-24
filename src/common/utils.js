@@ -167,6 +167,23 @@ var _ = (function() {
       return 'tt-' + _p8() + _p8(true) + _p8(true) + _p8();
     },
 
-    noop: function() {}
+    noop: function() {},
+
+    getRelativeOffset: function($node, $container) {
+      // Checking if $node is an ancestor of $container (not a valid case).
+      if ($.contains($node[0], $container[0])) {
+          return null;
+      }
+      var pos = $node.position();
+      var $parent = $node.offsetParent();
+      var parentPos;
+      while ($parent[0] !== $container[0] && !$.contains($parent[0], $container[0])) {
+        parentPos = $parent.position();
+        pos.left += parentPos.left;
+        pos.top += parentPos.top;
+        $parent = $parent.offsetParent();
+      }
+      return pos;
+    }
   };
 })();

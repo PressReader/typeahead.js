@@ -19,7 +19,10 @@ var DefaultMenu = (function() {
 
     open: function open() {
       // only display the menu when there's something to be shown
-      !this._allDatasetsEmpty() && this._show();
+      if(!this._allDatasetsEmpty()) {
+        this.cssDisplayObject = this._buildCssDisplayObject();
+        this._show();
+      }
       return s.open.apply(this, [].slice.call(arguments, 0));
     },
 
@@ -65,9 +68,21 @@ var DefaultMenu = (function() {
     },
 
     _show: function show() {
-      // can't use jQuery#show because $node is a span element we want
-      // display: block; not display: inline;
-      this.$node.css('display', 'block');
+      this.$node.css(this.cssDisplayObject);
+    },
+
+    _buildCssDisplayObject: function buildCssDisplayObject() {
+      var result = { display: 'block' };
+      var $el = this.$target;
+      var o = _.getRelativeOffset($el, this.$container);
+      if (o) {
+        result = $.extend(result, {
+          left: o.left + 'px',
+          top: (o.top + $el.outerHeight() + this.topIndent  + 'px'),
+          width: $el.outerWidth() + 'px'
+        });
+      }
+      return result;
     }
   });
 

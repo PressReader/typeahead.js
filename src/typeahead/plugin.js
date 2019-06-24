@@ -32,8 +32,8 @@
       return this.each(attach);
 
       function attach() {
-        var $input, $wrapper, $hint, $menu, defaultHint, defaultMenu,
-            eventBus, input, menu, status, typeahead, MenuConstructor;
+        var $input, $wrapper, $hint, $menu, $menuContainer, $menuTarget, defaultHint, defaultMenu,
+            eventBus, input, menu, status, typeahead, menuOptions, MenuConstructor;
 
         // highlight is a top-level config that needs to get inherited
         // from all of the datasets
@@ -43,6 +43,13 @@
         $wrapper = $(www.html.wrapper);
         $hint = $elOrNull(o.hint);
         $menu = $elOrNull(o.menu);
+
+        menuOptions = o.menu || {};
+        $menuContainer = $(menuOptions.container);
+        $menuTarget = $(menuOptions.target);
+        if (!$menuTarget.length) {
+          $menuTarget = $input;
+        }
 
         defaultHint = o.hint !== false && !$hint;
         defaultMenu = o.menu !== false && !$menu;
@@ -59,11 +66,16 @@
           $wrapper.css(www.css.wrapper);
           $input.css(defaultHint ? www.css.input : www.css.inputWithNoHint);
 
-          $input
-          .wrap($wrapper)
-          .parent()
-          .prepend(defaultHint ? $hint : null)
-          .append(defaultMenu ? $menu : null);
+          var $w = $input
+            .wrap($wrapper)
+            .parent();
+
+          $w.prepend(defaultHint ? $hint : null);
+
+          if (!$menuContainer.length) {
+            $menuContainer = $w;
+          }
+          $menuContainer.append(defaultMenu ? $menu : null);
         }
 
         MenuConstructor = defaultMenu ? DefaultMenu : Menu;
@@ -72,7 +84,10 @@
         input = new Input({ hint: $hint, input: $input, }, www);
         menu = new MenuConstructor({
           node: $menu,
-          datasets: datasets
+          datasets: datasets,
+          container: $menuContainer,
+          topIndent: menuOptions.topIndent,
+          target: $menuTarget
         }, www);
 
         status = new Status({
@@ -85,7 +100,7 @@
           menu: menu,
           eventBus: eventBus,
           minLength: o.minLength,
-          autoselect: o.autoselect
+          autoselect: o.autoselect,
         }, www);
 
         $input.data(keys.www, www);
