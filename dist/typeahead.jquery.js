@@ -1130,13 +1130,8 @@
         _.mixin(DefaultMenu.prototype, Menu.prototype, {
             open: function open() {
                 if (!this._allDatasetsEmpty()) {
-                    var $el = this.$target;
-                    var o = _.getRelativeOffset($el, this.$container);
-                    this._show({
-                        left: o && o.left >= 0 ? o.left + "px" : null,
-                        top: o && o.top >= 0 ? o.top + $el.outerHeight() + this.topIndent + "px" : null,
-                        width: $el.outerWidth() + "px"
-                    });
+                    this.cssDisplayObject = this._buildCssDisplayObject();
+                    this._show();
                 }
                 return s.open.apply(this, [].slice.call(arguments, 0));
             },
@@ -1168,17 +1163,20 @@
                 this.$node.hide();
             },
             _show: function show(params) {
-                if (params) {
-                    this.left = params.left;
-                    this.top = params.top;
-                    this.width = params.width;
+                this.$node.css(this.cssDisplayObject);
+            },
+            _buildCssDisplayObject: function buildCssDisplayObject() {
+                var $el = this.$target;
+                var o = _.getRelativeOffset($el, this.$container);
+                if (o) {
+                    return {
+                        display: "block",
+                        left: o.left + "px",
+                        top: o.top + $el.outerHeight() + this.topIndent + "px",
+                        width: $el.outerWidth() + "px"
+                    };
                 }
-                this.$node.css({
-                    display: "block",
-                    left: this.left,
-                    top: this.top,
-                    width: this.width
-                });
+                return {};
             }
         });
         return DefaultMenu;
