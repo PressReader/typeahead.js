@@ -74,15 +74,15 @@ var DefaultMenu = (function() {
     _buildCssDisplayObject: function buildCssDisplayObject() {
       var $el = this.$target;
       var o = _.getRelativeOffset($el, this.$container);
+      var result = { display: 'block' };
       if (o) {
-        return {
-          display: 'block',
+        return $.merge(result, {
           left: o.left + 'px',
           top: (o.top + $el.outerHeight() + this.topIndent  + 'px'),
           width: $el.outerWidth() + 'px'
-        };
+        });
       }
-      return {};
+      return result;
     }
   });
 
